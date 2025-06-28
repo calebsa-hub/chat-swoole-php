@@ -9,6 +9,8 @@
         #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
         input { padding: 10px; }
         button { padding: 10px; }
+        .message { margin-bottom: 5px; }
+        .message strong { color: #333; }
     </style>
 </head>
 <body>
@@ -43,8 +45,23 @@
 
                 ws.onmessage = function(event) {
                     const msgBox = document.getElementById('messages');
+                    const data = JSON.parse(event.data);
+
                     const message = document.createElement('div');
-                    message.textContent = event.data;
+                    message.classList.add('message');
+
+                    if (typeof data === 'string') {
+                        message.textContent = data;
+                    } else if (data.type === 'message') {
+                        message.innerHTML = `<strong>${data.name}:</strong> ${data.text}`;
+                    } else if (data.type === 'join' || data.type === 'leave') {
+                        message.textContent = data.text;
+                        message.style.fontStyle = 'italic';
+                        message.style.color = 'gray';
+                    } else {
+                        message.textContent = event.data;
+                    }
+
                     msgBox.appendChild(message);
                     msgBox.scrollTop = msgBox.scrollHeight;
                 };
@@ -62,4 +79,3 @@
 
 </body>
 </html>
-
