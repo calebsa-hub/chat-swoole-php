@@ -21,35 +21,41 @@ $server->on('open', function ($server, $request) use (&$clients, $redis) {
 $server->on('message', function ($server, $frame) use (&$clients, $redis) {
     $data = json_decode($frame->data, true);
 
-    // Verificar se a mensagem é do tipo "join"
     if ($data['type'] === 'join') {
         $clients[$frame->fd]['name'] = $data['name'];
+        $name = $clients[$frame->fd]['name'];
 
-        $joinMessage = "{$data['name']} entrou no chat.";
-        $redis->rPush('chat:messages', $joinMessage);
+        $joinMessage = [
+            'type' => 'join',
+            'text' => "{$name} entrou no chat."
+        ];
 
-        // Avisar a todos que o usuário entrou
+        $redis->rPush('chat:messages', json_encode($joinMessage));
+
         foreach ($clients as $fd => $client) {
             if ($server->isEstablished($fd)) {
-                $server->push($fd, $joinMessage);
+                $server->push($fd, json_encode($joinMessage));
             }
         }
+
         return;
     }
 
-    // Se for mensagem normal
     if ($data['type'] === 'message') {
         $name = $clients[$frame->fd]['name'];
-        $message = "{$name}: {$data['text']}";
 
-        $redis->rPush('chat:messages', $message);
+        $messageData = [
+            'type' => 'message',
+            'name' => $name,
+            'text' => $data['text']
+        ];
 
-        $redis->lTrim('chat:messages', -100, -1);
-
+        $redis->rPush('chat:messages', json_encode($messageData));
+        $redis->lTrim('chat:messages', -100, -1); // Limitar o histórico a 100 mensagens
 
         foreach ($clients as $fd => $client) {
             if ($server->isEstablished($fd)) {
-                $server->push($fd, $message);
+                $server->push($fd, json_encode($messageData));
             }
         }
     }
@@ -60,15 +66,20 @@ $server->on('close', function ($server, $fd) use (&$clients, $redis) {
         $name = $clients[$fd]['name'];
         unset($clients[$fd]);
 
-        $leaveMessage = "{$name} saiu do chat.";
-        $redis->rPush('chat:messages', $leaveMessage);
+        $leaveMessage = [
+            'type' => 'leave',
+            'text' => "{$name} saiu do chat."
+        ];
+
+        $redis->rPush('chat:messages', json_encode($leaveMessage));
 
         foreach ($clients as $clientFd => $client) {
             if ($server->isEstablished($clientFd)) {
-                $server->push($clientFd, $leaveMessage);
+                $server->push($clientFd, json_encode($leaveMessage));
             }
         }
     }
+
     echo "Conexão fechada: ID {$fd}\n";
 });
 
