@@ -43,11 +43,21 @@ $server->on('message', function ($server, $frame) use (&$clients, $redis) {
 
     if ($data['type'] === 'message') {
         $name = $clients[$frame->fd]['name'];
+        $message = $data['text'];
+
+        if (preg_match('/\d{8,}/', $message)) {
+            $server->push($frame->fd, json_encode([
+                'type' => 'message',
+                'name' => 'Sistema',
+                'text' => '🚫 Sua mensagem foi bloqueada por conter números suspeitos.'
+            ]));
+            return;
+        }
 
         $messageData = [
             'type' => 'message',
             'name' => $name,
-            'text' => $data['text']
+            'text' => $message
         ];
 
         $redis->rPush('chat:messages', json_encode($messageData));
