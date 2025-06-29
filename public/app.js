@@ -7,7 +7,7 @@ function enterChat() {
     userColor = getRandomColorClass();
 
     if (username !== '') {
-        ws = new WebSocket('wss://chat-swoole-php-production.up.railway.app');
+        ws = new WebSocket('wss://chat-swoole-php.onrender.com');
 
         ws.onopen = function() {
             document.getElementById('login').style.display = 'none';
