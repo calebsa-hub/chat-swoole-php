@@ -33,14 +33,26 @@ function enterChat() {
             msgBox.appendChild(message);
             msgBox.scrollTop = msgBox.scrollHeight;
         };
+
+        ws.onclose = function() {
+            alert('⚠️ Conexão com o servidor perdida. Atualize a página para tentar novamente.');
+        };
+
+        ws.onerror = function() {
+            alert('❌ Ocorreu um erro na conexão com o servidor.');
+        };
     }
 }
 
 function sendMessage() {
     const input = document.getElementById('message');
     if (input.value.trim() !== '') {
-        ws.send(JSON.stringify({ type: 'message', name: username, text: input.value }));
-        input.value = '';
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'message', name: username, text: input.value }));
+            input.value = '';    
+        } else {
+            alert('⚠️ Conexão perdida. Atualize a página para reconectar.');
+        }
     }
 }
 
