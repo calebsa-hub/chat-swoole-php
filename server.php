@@ -2,9 +2,15 @@
 
 $redisHost = getenv('REDIS_HOST');
 $redisPort = getenv('REDIS_PORT');
+$redisPassword = getenv('REDIS_PASSWORD');
 
 $redis = new Redis();
 $redis->connect($redisHost, $redisPort);
+
+// Autenticação obrigatória
+if ($redisPassword) {
+    $redis->auth($redisPassword);
+}
 
 $port = getenv('PORT') ?: 8080; // Usa a porta do Railway ou 8000 padrão
 $server = new Swoole\WebSocket\Server("0.0.0.0", $port);
