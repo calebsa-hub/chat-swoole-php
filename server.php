@@ -107,18 +107,53 @@ $server->on('close', function ($server, $fd) use (&$clients, $redis) {
 });
 
 $server->on("request", function ($request, $response) {
-    if ($request->server['request_uri'] === '/') {
-        // Ler o arquivo index.html e retornar seu conteúdo
-        $indexFile = file_get_contents('/app/public/index.html');  // Ou o caminho correto do seu index.html
-        $response->header("Content-Type", "text/html");  // Definindo o tipo do conteúdo como HTML
-        $response->end($indexFile);  // Envia o conteúdo do index.html
-    } 
+    $uri = $request->server['request_uri'];
 
-    if ($request->server['request_uri'] === '/health') {
-        $response->end('OK');  // Resposta simples para o Healthcheck
-    } else {
-        $response->end("Olá, mundo!");
+    // Serve index.html na raiz
+    if ($uri === "/") {
+        $indexFile = file_get_contents(__DIR__ . '/public/index.html');
+        $response->header("Content-Type", "text/html");
+        $response->end($indexFile);
+        return;
     }
+
+    // Serve arquivos estáticos (CSS, JS, imagens, etc.)
+    $filePath = __DIR__ . '/public' . $uri;
+
+    if (file_exists($filePath)) {
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+
+        // Define o Content-Type correto
+        $mimeTypes = [
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'ico' => 'image/x-icon',
+            'svg' => 'image/svg+xml',
+        ];
+
+        if (isset($mimeTypes[$extension])) {
+            $response->header('Content-Type', $mimeTypes[$extension]);
+        } else {
+            $response->header('Content-Type', 'application/octet-stream');
+        }
+
+        $response->end(file_get_contents($filePath));
+        return;
+    }
+
+    // Healthcheck
+    if ($uri === '/health') {
+        $response->end('OK');
+        return;
+    }
+
+    // Se não encontrar o arquivo, responde 404
+    $response->status(404);
+    $response->end("Página não encontrada");
 });
 
 $server->start();
