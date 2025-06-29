@@ -11,7 +11,7 @@ WORKDIR /app
 COPY . .
 
 # Expor a porta (Railway injeta a variável PORT)
-EXPOSE 8000
+EXPOSE 8080
 
 # Comando para iniciar o servidor
 CMD ["php", "server.php"]
