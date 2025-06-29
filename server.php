@@ -23,10 +23,15 @@ $server->on('message', function ($server, $frame) use (&$clients, $redis) {
 
     if ($data['type'] === 'join') {
         $clients[$frame->fd]['name'] = $data['name'];
+        $clients[$frame->fd]['color'] = $data['color'];
+
         $name = $clients[$frame->fd]['name'];
+        $color = $clients[$frame->fd]['color'];
 
         $joinMessage = [
             'type' => 'join',
+            'name' => $name,
+            'color' => $color,
             'text' => "{$name} entrou no chat."
         ];
 
@@ -43,12 +48,14 @@ $server->on('message', function ($server, $frame) use (&$clients, $redis) {
 
     if ($data['type'] === 'message') {
         $name = $clients[$frame->fd]['name'];
+        $color = $clients[$frame->fd]['color'];
         $message = $data['text'];
 
         if (preg_match('/\d{8,}/', $message)) {
             $server->push($frame->fd, json_encode([
                 'type' => 'message',
                 'name' => 'Sistema',
+                'color' => 'text-gray-700',
                 'text' => '🚫 Sua mensagem foi bloqueada por conter números suspeitos.'
             ]));
             return;
@@ -57,6 +64,7 @@ $server->on('message', function ($server, $frame) use (&$clients, $redis) {
         $messageData = [
             'type' => 'message',
             'name' => $name,
+            'color' => $color,
             'text' => $message
         ];
 
