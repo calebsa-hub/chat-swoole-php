@@ -5,6 +5,9 @@ $redis->connect('127.0.0.1', 6379);
 
 $server = new Swoole\WebSocket\Server("0.0.0.0", 9502);
 
+$port = getenv('PORT') ?: 8000; // Railway injeta a porta no ambiente
+$server->listen("0.0.0.0", $port);
+
 $clients = [];
 
 $server->on('open', function ($server, $request) use (&$clients, $redis) {
