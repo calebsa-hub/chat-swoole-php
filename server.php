@@ -109,7 +109,7 @@ $server->on('close', function ($server, $fd) use (&$clients, $redis) {
 $server->on("request", function ($request, $response) {
     if ($request->server['request_uri'] === '/') {
         // Ler o arquivo index.html e retornar seu conteúdo
-        $indexFile = file_get_contents('/public/index.html');  // Ou o caminho correto do seu index.html
+        $indexFile = file_get_contents('/app/public/index.html');  // Ou o caminho correto do seu index.html
         $response->header("Content-Type", "text/html");  // Definindo o tipo do conteúdo como HTML
         $response->end($indexFile);  // Envia o conteúdo do index.html
     } 
