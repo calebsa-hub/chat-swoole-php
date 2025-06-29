@@ -1,7 +1,7 @@
 <?php
 
 $redis = new Redis();
-$redis->connect('127.0.0.1', 6379);
+$redis->connect('shuttle.proxy.rlwy.net', 36166);
 
 $port = getenv('PORT') ?: 8000; // Usa a porta do Railway ou 8000 padrão
 $server = new Swoole\WebSocket\Server("0.0.0.0", $port);
