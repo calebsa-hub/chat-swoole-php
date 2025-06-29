@@ -47,12 +47,8 @@ function enterChat() {
 function sendMessage() {
     const input = document.getElementById('message');
     if (input.value.trim() !== '') {
-        if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'message', name: username, text: input.value }));
-            input.value = '';    
-        } else {
-            alert('⚠️ Conexão perdida. Atualize a página para reconectar.');
-        }
+        ws.send(JSON.stringify({ type: 'message', name: username, text: input.value }));
+        input.value = '';    
     }
 }
 
